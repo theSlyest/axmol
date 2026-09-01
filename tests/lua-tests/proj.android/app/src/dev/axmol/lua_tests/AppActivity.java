@@ -26,7 +26,9 @@
 
 package dev.axmol.lua_tests;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.view.WindowManager;
 import dev.axmol.lib.AxmolActivity;
 import dev.axmol.lib.SharedLoader;
 import dev.axmol.lib.AxmolGLSurfaceView;
@@ -48,6 +50,13 @@ public class AppActivity extends AxmolActivity{
             //  at the top of the stack (ie: the last state of this task)
             // Don't need to finish it again since it's finished in super.onCreate .
             return;
+        }
+        // Make sure we're running on Pie or higher to change cutout mode
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // Enable rendering into the cutout area
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            getWindow().setAttributes(lp);
         }
         // DO OTHER INITIALIZATION BELOW
 

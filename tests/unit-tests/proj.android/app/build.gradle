@@ -129,6 +129,8 @@ androidComponents {
 }
 
 dependencies {
+    def appcompat_ver = buildProfiles['appcompat']
+    implementation "androidx.appcompat:appcompat:$appcompat_ver"
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':libaxmol')
 }
