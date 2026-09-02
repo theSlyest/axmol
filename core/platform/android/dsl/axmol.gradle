@@ -101,8 +101,8 @@ class AxmolUtils {
         def ndkVer = translateNdkVer(profiles['ndk'])
 
         // cmakeVer should overwrite by command line
-        if (project.properties.__1K_CMAKE_VERSION != null)
-            cmakeVer = project.properties.__1K_CMAKE_VERSION
+        if (project.hasProperty('__1K_CMAKE_VERSION'))
+            cmakeVer = project.findProperty('__1K_CMAKE_VERSION')
 
         // Detecting sdkRoot
         def cmdlineSdkRoot = Paths.get("${System.env.ANDROID_HOME}").toAbsolutePath().toString()
@@ -397,10 +397,14 @@ class AxmolUtils {
 
     private static void generateCMakeOptions(project, buildProfiles) {
         def options = []
-        for(item in project.properties) {
-            if (item.key.startsWith('_1K_')) {
-                options.add("\"-D${item.key.substring(4)}=${item.value}\"")
-            }
+//        for(item in project.properties) {
+//            if (item.key.startsWith('_1K_')) {
+//                options.add("\"-D${item.key.substring(4)}=${item.value}\"")
+//            }
+//        }
+        def kProperties = project.providers.gradlePropertiesPrefixedBy('_1K_').get()
+        for(item in kProperties) {
+            options.add("\"-D${item.key.substring(4)}=${item.value}\"")
         }
         def androidProjDir = project.projectDir.toString().replaceAll("\\\\", "/")
         def ninjaPath = buildProfiles['ninjaPath'].replaceAll("\\\\", "/")
