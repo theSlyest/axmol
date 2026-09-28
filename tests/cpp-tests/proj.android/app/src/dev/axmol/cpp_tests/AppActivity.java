@@ -23,7 +23,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
-package dev.axmol.app;
+package dev.axmol.cpp_tests;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -49,13 +49,6 @@ public class AppActivity extends AxmolActivity {
             //  at the top of the stack (ie: the last state of this task)
             // Don't need to finish it again since it's finished in super.onCreate .
             return;
-        }
-        // Make sure we're running on Pie or higher to change cutout mode
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            // Enable rendering into the cutout area
-            WindowManager.LayoutParams lp = getWindow().getAttributes();
-            lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-            getWindow().setAttributes(lp);
         }
         // DO OTHER INITIALIZATION BELOW
 

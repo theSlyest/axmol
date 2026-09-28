@@ -34,7 +34,7 @@ def _check_ndk_root_env():
         sdkRoot = os.environ.get('ANDROID_HOME', None)
         for _, ndkVers, _ in os.walk("{0}{1}ndk".format(sdkRoot, os.path.sep)):
             for ndkVer in ndkVers:
-                if (ndkVer >= '23.2.8568313'):
+                if (ndkVer >= '29.0.14931843'):
                     ANDROID_NDK = "{0}{1}ndk{1}{2}".format(sdkRoot, os.path.sep, ndkVer)
                     break
             break
