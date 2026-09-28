@@ -257,8 +257,9 @@ $cmdlinetools_revs = @{
     '23.0' = '16111833'
 }
 
-$ndk_r23d_rev = '12186248'
+# $ndk_r23d_rev = '12186248'
 # $ndk_r25d_rev = '12161346'
+$ndk_r29_rev = '14931843'
 
 # eva: evaluated_args
 $options = @{
@@ -1400,27 +1401,27 @@ function setup_android_sdk() {
     if (!$1k.isdir("$ndk_root")) {
         $ndk_prefix = Join-Path $sdk_root 'ndk'
 
-        if ($ndk_ver -eq 'r23d') {
-            # for android 15 16KB page size support, ndk-r23d only available on ci.android.com, refer:
+        if ($ndk_ver -eq 'r29') {
+            # for android 15 16KB page size support, ndk-r29 only available on ci.android.com, refer:
             # - https://developer.android.com/about/versions/15/behavior-changes-all#16-kb
             # - https://developer.android.google.cn/about/versions/15/behavior-changes-all?hl=zh-cn#16-kb
             # IF fail, you can visit download url by browser:
-            # - https://ci.android.com/builds/submitted/12186248/win64/latest/android-ndk-12186248-windows-x86_64.zip
-            # - https://ci.android.com/builds/submitted/12186248/linux/latest/android-ndk-12186248-linux-x86_64.zip
-            # - https://ci.android.com/builds/submitted/12186248/darwin_mac/latest/android-ndk-12186248-darwin-x86_64.zip
+            # - https://ci.android.com/builds/submitted/14931843/win64/latest/android-ndk-14931843-windows-x86_64.zip
+            # - https://ci.android.com/builds/submitted/14931843/linux/latest/android-ndk-14931843-linux-x86_64.zip
+            # - https://ci.android.com/builds/submitted/14931843/darwin_mac/latest/android-ndk-14931843-darwin-x86_64.zip
 
             $1k.println("Not found suitable android ndk, installing from ci.android.com ...")
 
-            $_artifact = @("android-ndk-${ndk_r23d_rev}-windows-x86_64.zip",
-                "android-ndk-${ndk_r23d_rev}-linux-x86_64.zip",
-                "android-ndk-${ndk_r23d_rev}-darwin-x86_64.zip")[$HOST_OS_INT]
+            $_artifact = @("android-ndk-${ndk_r29_rev}-windows-x86_64.zip",
+                "android-ndk-${ndk_r29_rev}-linux-x86_64.zip",
+                "android-ndk-${ndk_r29_rev}-darwin-x86_64.zip")[$HOST_OS_INT]
             $_target_os = @('win64', 'linux', 'darwin_mac')[$HOST_OS_INT]
-            . (Join-Path $PSScriptRoot 'resolv-url.ps1') -artifact $_artifact -target $_target_os -build_id $ndk_r23d_rev -manifest gcloud -out_var 'artifact_info'
+            . (Join-Path $PSScriptRoot 'resolv-url.ps1') -artifact $_artifact -target $_target_os -build_id $ndk_r29_rev -manifest gcloud -out_var 'artifact_info'
             $artifact_url = $artifact_info[0].messageData
-            $full_ver = "23.3.${ndk_r23d_rev}"
+            $full_ver = "29.0.${ndk_r29_rev}"
             $ndk_root = Join-Path $ndk_prefix $full_ver
-            fetch_pkg $artifact_url -o $_artifact -exrep "android-ndk-r23d-canary=$full_ver" -prefix $ndk_prefix
-            if (!$1k.isdir($ndk_root)) { throw "Install android-ndk-r23d fail, please try again" }
+            fetch_pkg $artifact_url -o $_artifact -exrep "android-ndk-r29=$full_ver" -prefix $ndk_prefix
+            if (!$1k.isdir($ndk_root)) { throw "Install android-ndk-r29 fail, please try again" }
         }
         else {
             $1k.println("Not found suitable android ndk, installing ndk-$ndk_ver by sdkmanager ...")
@@ -1429,7 +1430,7 @@ function setup_android_sdk() {
             if ($null -ne $matchInfos -and $matchInfos.Count -gt 0) {
                 $ndks = @{}
                 foreach ($matchInfo in $matchInfos) {
-                    $fullVer = $matchInfo.Line.Trim().Split(' ')[0] # "ndk;23.2.8568313"
+                    $fullVer = $matchInfo.Line.Trim().Split(' ')[0] # "ndk;29.0.14931843"
                     $verNums = $fullVer.Split(';')[1].Split('.')
                     $ndkVer = 'r'
                     $ndkVer += $verNums[0]
