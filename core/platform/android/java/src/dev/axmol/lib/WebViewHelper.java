@@ -24,20 +24,17 @@
 
 package dev.axmol.lib;
 
-import android.annotation.TargetApi;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
-import android.webkit.WebView;
-import android.widget.FrameLayout;
 import android.webkit.WebSettings;
+import android.widget.FrameLayout;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -54,7 +51,7 @@ public class WebViewHelper {
 
     public WebViewHelper(FrameLayout layout) {
         WebViewHelper.sLayout = layout;
-        WebViewHelper.sHandler = new Handler(Looper.myLooper());
+        WebViewHelper.sHandler = new Handler(Objects.requireNonNull(Looper.myLooper()));
 
         WebViewHelper.sAxmolActivity = (AxmolActivity) AxmolActivity.getContext();
         WebViewHelper.webViews = new SparseArray<AxmolWebView>();
@@ -86,202 +83,158 @@ public class WebViewHelper {
 
     public static int createWebView() {
         final int index = viewTag;
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = new AxmolWebView(sAxmolActivity, index);
-                FrameLayout.LayoutParams lParams = new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT);
-                sLayout.addView(webView, lParams);
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = new AxmolWebView(sAxmolActivity, index);
+            FrameLayout.LayoutParams lParams = new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT);
+            sLayout.addView(webView, lParams);
 
-                webViews.put(index, webView);
-            }
+            webViews.put(index, webView);
         });
         return viewTag++;
     }
 
     public static void removeWebView(final int index) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webViews.remove(index);
-                    sLayout.removeView(webView);
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webViews.remove(index);
+                sLayout.removeView(webView);
             }
         });
     }
 
     public static void setVisible(final int index, final boolean visible) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webView.setVisibility(visible ? View.VISIBLE : View.GONE);
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webView.setVisibility(visible ? View.VISIBLE : View.GONE);
             }
         });
     }
 
     public static void setBackgroundTransparent(final int index) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webView.setBackgroundColor(Color.TRANSPARENT);
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webView.setBackgroundColor(Color.TRANSPARENT);
             }
         });
     }
 
     public static void setOpacityWebView(final int index, final float opacity) {
-        if(android.os.Build.VERSION.SDK_INT >10){
-            sAxmolActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    AxmolWebView webView = webViews.get(index);
-                    if (webView != null) {
-                        try {
-                            Method method = webView.getClass().getMethod("setAlpha",float.class);
-                            method.invoke(webView,opacity);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                try {
+                    Method method = webView.getClass().getMethod("setAlpha", float.class);
+                    method.invoke(webView, opacity);
+                } catch (Exception e) {
+//                    e.printStackTrace();
+                    Log.e(TAG, e.toString());
                 }
-            });
-        }
+            }
+        });
     }
 
 
     public static float getOpacityWebView(final int index) {
-        if(android.os.Build.VERSION.SDK_INT >10){
-            FutureTask<Float> futureResult = new FutureTask<Float>(new Callable<Float>() {
-            @Override
-            public Float call() throws Exception {
-                float opacity=0.f;
-                AxmolWebView webView = webViews.get(index);
-                Object valueToReturn=null;
-                if (webView != null) {
-                    try {
-                        Method method = webView.getClass().getMethod("getAlpha");
-                        valueToReturn = method.invoke(webView);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+        FutureTask<Float> futureResult = new FutureTask<Float>(() -> {
+            AxmolWebView webView = webViews.get(index);
+            Object valueToReturn = null;
+            if (webView != null) {
+                try {
+                    Method method = webView.getClass().getMethod("getAlpha");
+                    valueToReturn = method.invoke(webView);
+                } catch (Exception e) {
+//                    e.printStackTrace();
+                    Log.e(TAG, e.toString());
                 }
-                return (Float) valueToReturn;
             }
-            });
-            sAxmolActivity.runOnUiThread(futureResult);
-            try {
-                return futureResult.get();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            return (Float) valueToReturn;
+        });
+        sAxmolActivity.runOnUiThread(futureResult);
+        try {
+            return futureResult.get();
+        } catch (Exception e) {
+//            e.printStackTrace();
+            Log.e(TAG, e.toString());
         }
         return 1;
     }
 
     public static void setWebViewRect(final int index, final int left, final int top, final int maxWidth, final int maxHeight) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webView.setWebViewRect(left, top, maxWidth, maxHeight);
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webView.setWebViewRect(left, top, maxWidth, maxHeight);
             }
         });
     }
 
     public static void setJavascriptInterfaceScheme(final int index, final String scheme) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webView.setJavascriptInterfaceScheme(scheme);
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webView.setJavascriptInterfaceScheme(scheme);
             }
         });
     }
 
     public static void loadData(final int index, final String data, final String mimeType, final String encoding, final String baseURL) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webView.loadDataWithBaseURL(baseURL, data, mimeType, encoding, null);
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webView.loadDataWithBaseURL(baseURL, data, mimeType, encoding, null);
             }
         });
     }
 
     public static void loadHTMLString(final int index, final String data, final String baseUrl) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webView.loadDataWithBaseURL(baseUrl, data, null, null, null);
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webView.loadDataWithBaseURL(baseUrl, data, null, null, null);
             }
         });
     }
 
     public static void loadUrl(final int index, final String url, final boolean cleanCachedData) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webView.getSettings().setCacheMode(cleanCachedData ? WebSettings.LOAD_NO_CACHE
-                                                                       : WebSettings.LOAD_DEFAULT);
-                    webView.loadUrl(url);
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webView.getSettings().setCacheMode(cleanCachedData ? WebSettings.LOAD_NO_CACHE
+                                                                   : WebSettings.LOAD_DEFAULT);
+                webView.loadUrl(url);
             }
         });
     }
 
     public static void loadFile(final int index, final String filePath) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webView.loadUrl(filePath);
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webView.loadUrl(filePath);
             }
         });
     }
 
     public static void stopLoading(final int index) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webView.stopLoading();
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webView.stopLoading();
             }
         });
 
     }
 
     public static void reload(final int index) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webView.reload();
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webView.reload();
             }
         });
     }
@@ -293,83 +246,63 @@ public class WebViewHelper {
     }
 
     public static boolean canGoBack(final int index) {
-        Callable<Boolean> callable = new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                AxmolWebView webView = webViews.get(index);
-                return webView != null && webView.canGoBack();
-            }
+        Callable<Boolean> callable = () -> {
+            AxmolWebView webView = webViews.get(index);
+            return webView != null && webView.canGoBack();
         };
         try {
             return callInMainThread(callable);
-        } catch (ExecutionException e) {
-            return false;
-        } catch (InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
+            Log.e(TAG, e.toString());
             return false;
         }
     }
 
     public static boolean canGoForward(final int index) {
-        Callable<Boolean> callable = new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                AxmolWebView webView = webViews.get(index);
-                return webView != null && webView.canGoForward();
-            }
+        Callable<Boolean> callable = () -> {
+            AxmolWebView webView = webViews.get(index);
+            return webView != null && webView.canGoForward();
         };
         try {
             return callInMainThread(callable);
-        } catch (ExecutionException e) {
-            return false;
-        } catch (InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
+            Log.e(TAG, e.toString());
             return false;
         }
     }
 
     public static void goBack(final int index) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webView.goBack();
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webView.goBack();
             }
         });
     }
 
     public static void goForward(final int index) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webView.goForward();
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webView.goForward();
             }
         });
     }
 
     public static void evaluateJS(final int index, final String js) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webView.loadUrl("javascript:" + js);
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webView.loadUrl("javascript:" + js);
             }
         });
     }
 
     public static void setScalesPageToFit(final int index, final boolean scalesPageToFit) {
-        sAxmolActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AxmolWebView webView = webViews.get(index);
-                if (webView != null) {
-                    webView.setScalesPageToFit(scalesPageToFit);
-                }
+        sAxmolActivity.runOnUiThread(() -> {
+            AxmolWebView webView = webViews.get(index);
+            if (webView != null) {
+                webView.setScalesPageToFit(scalesPageToFit);
             }
         });
     }

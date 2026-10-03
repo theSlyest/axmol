@@ -25,7 +25,6 @@
  ****************************************************************************/
 package dev.axmol.lib;
 
-import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
@@ -44,8 +43,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -83,12 +80,7 @@ public abstract class AxmolActivity extends AppCompatActivity implements AxmolEn
 
     public void setKeepScreenOn(boolean value) {
         final boolean newValue = value;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mGLSurfaceView.setKeepScreenOn(newValue);
-            }
-        });
+        runOnUiThread(() -> mGLSurfaceView.setKeepScreenOn(newValue));
     }
 
     public void impactOccurred(int style) {
@@ -347,33 +339,30 @@ public abstract class AxmolActivity extends AppCompatActivity implements AxmolEn
             return;
         }
 
-        if (Build.VERSION.SDK_INT >= 19) {
-            // use reflection to remove dependence of API level
+        // use reflection to remove dependence of API level
+        Class<View> viewClass = View.class;
 
-            Class viewClass = View.class;
+        try {
+            final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = ReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION");
+            final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = ReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN");
+            final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = ReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_HIDE_NAVIGATION");
+            final int SYSTEM_UI_FLAG_FULLSCREEN = ReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_FULLSCREEN");
+            final int SYSTEM_UI_FLAG_IMMERSIVE_STICKY = ReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_IMMERSIVE_STICKY");
+            final int SYSTEM_UI_FLAG_LAYOUT_STABLE = ReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_LAYOUT_STABLE");
 
-            try {
-                final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = ReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION");
-                final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = ReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN");
-                final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = ReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_HIDE_NAVIGATION");
-                final int SYSTEM_UI_FLAG_FULLSCREEN = ReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_FULLSCREEN");
-                final int SYSTEM_UI_FLAG_IMMERSIVE_STICKY = ReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_IMMERSIVE_STICKY");
-                final int SYSTEM_UI_FLAG_LAYOUT_STABLE = ReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_LAYOUT_STABLE");
-
-                // getWindow().getDecorView().setSystemUiVisibility();
-                final Object[] parameters = new Object[]{SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                        | SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                        | SYSTEM_UI_FLAG_IMMERSIVE_STICKY};
-                ReflectionHelper.<Void>invokeInstanceMethod(getWindow().getDecorView(),
-                        "setSystemUiVisibility",
-                        new Class[]{Integer.TYPE},
-                        parameters);
-            } catch (NullPointerException e) {
-                Log.e(TAG, "hideVirtualButton", e);
-            }
+            // getWindow().getDecorView().setSystemUiVisibility();
+            final Object[] parameters = new Object[]{SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                    | SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                    | SYSTEM_UI_FLAG_IMMERSIVE_STICKY};
+            ReflectionHelper.<Void>invokeInstanceMethod(getWindow().getDecorView(),
+                    "setSystemUiVisibility",
+                    new Class[]{Integer.TYPE},
+                    parameters);
+        } catch (NullPointerException e) {
+            Log.e(TAG, "hideVirtualButton", e);
         }
     }
 
@@ -400,11 +389,7 @@ public abstract class AxmolActivity extends AppCompatActivity implements AxmolEn
         if(powerManager == null) {
             return false;
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
-            return !powerManager.isInteractive();
-        } else {
-            return !powerManager.isInteractive();
-        }
+        return !powerManager.isInteractive();
     }
 
     // ===========================================================
