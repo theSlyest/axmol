@@ -126,7 +126,6 @@ class ClockUtils {
  *       VideoFrameMetadataListener}, or null.
  * </ul>
  */
-@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 @UnstableApi
 public class MediaCodecVideoRenderer extends MediaCodecRenderer {
   // region ByteBufferMode
@@ -750,7 +749,6 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
   }
 
   @NonNull
-  @RequiresApi(21) // Needed for placeHolderSurface usage, as it is always null on API level 16.
   @Override
   protected MediaCodecAdapter.Configuration getMediaCodecConfiguration(
       MediaCodecInfo codecInfo,
@@ -1484,7 +1482,6 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     codec.setOutputSurface(surface);
   }
 
-  @RequiresApi(21)
   private static void configureTunnelingV21(MediaFormat mediaFormat, int tunnelingAudioSessionId) {
     mediaFormat.setFeatureEnabled(CodecCapabilities.FEATURE_TunneledPlayback, true);
     mediaFormat.setInteger(MediaFormat.KEY_AUDIO_SESSION_ID, tunnelingAudioSessionId);
@@ -1505,7 +1502,6 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
    * @return The framework {@link MediaFormat} that should be used to configure the decoder.
    */
   @SuppressLint("InlinedApi")
-  @RequiresApi(21) // tunnelingAudioSessionId is unset if Build.VERSION.SDK_INT < 21
   protected MediaFormat getMediaFormat(
       Format format,
       String codecMimeType,

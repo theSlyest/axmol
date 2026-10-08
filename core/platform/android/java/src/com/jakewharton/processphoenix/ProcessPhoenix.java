@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import java.util.ArrayList;
@@ -85,7 +86,10 @@ public final class ProcessPhoenix extends Activity {
 
         Process.killProcess(getIntent().getIntExtra(KEY_MAIN_PROCESS_PID, -1)); // Kill original main process
 
-        ArrayList<Intent> intents = getIntent().getParcelableArrayListExtra(KEY_RESTART_INTENTS);
+        ArrayList<Intent> intents = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                ? getIntent().getParcelableArrayListExtra(KEY_RESTART_INTENTS, Intent.class)
+                : getIntent().getParcelableArrayListExtra(KEY_RESTART_INTENTS);
+        assert intents != null;
         startActivities(intents.toArray(new Intent[intents.size()]));
         finish();
         Runtime.getRuntime().exit(0); // Kill kill kill!
@@ -93,7 +97,7 @@ public final class ProcessPhoenix extends Activity {
 
     /**
      * Checks if the current process is a temporary Phoenix Process.
-     * This can be used to avoid initialisation of unused resources or to prevent running code that
+     * This can be used to avoid initialization of unused resources or to prevent running code that
      * is not multi-process ready.
      *
      * @return true if the current process is a temporary Phoenix Process

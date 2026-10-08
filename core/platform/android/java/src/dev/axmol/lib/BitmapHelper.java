@@ -28,11 +28,10 @@ package dev.axmol.lib;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.text.BoringLayout;
+import android.os.Build;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -133,7 +132,13 @@ public final class BitmapHelper {
             while (actualHeight > height || actualWidth > width) {
                 fontSize = fontSize - 1;
 
-                Layout layout = new StaticLayout(text, paint, (int) width, hAlignment,1.0f,0.0f,false);
+                Layout layout = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                        ? StaticLayout.Builder.obtain(text, 0, text.length(), paint, width)
+                            .setAlignment(hAlignment)
+                            .setLineSpacing(0.0f,1.0f)
+                            .setIncludePad(false)
+                            .build()
+                        : new StaticLayout(text, paint, width, hAlignment,1.0f,0.0f,false);
                 actualWidth = layout.getWidth();
                 actualHeight = layout.getLineTop(layout.getLineCount());
 
@@ -196,12 +201,24 @@ public final class BitmapHelper {
 
         if (overflow == 1 && !enableWrap){
             int widthBoundary = (int)Math.ceil( StaticLayout.getDesiredWidth(string, paint));
-            layout = new StaticLayout(string, paint, widthBoundary , hAlignment,1.0f,0.0f,false);
+            layout = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                    ? StaticLayout.Builder.obtain(string, 0, string.length(), paint, widthBoundary)
+                        .setAlignment(hAlignment)
+                        .setLineSpacing(0,1.0f)
+                        .setIncludePad(false)
+                        .build()
+                    : new StaticLayout(string, paint, widthBoundary , hAlignment,1.0f,0.0f,false);
         }else {
             if (overflow == 2) {
                 calculateShrinkTypeFace(string, width, height, hAlignment, fontSize, paint, enableWrap);
             }
-            layout = new StaticLayout(string, paint, maxWidth , hAlignment,1.0f,0.0f,false);
+            layout = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                    ? StaticLayout.Builder.obtain(string, 0, string.length(), paint, maxWidth)
+                        .setAlignment(hAlignment)
+                        .setLineSpacing(0.0f,1.0f)
+                        .setIncludePad(false)
+                        .build()
+                    : new StaticLayout(string, paint, maxWidth , hAlignment,1.0f,0.0f,false);
         }
 
         layoutWidth = layout.getWidth();

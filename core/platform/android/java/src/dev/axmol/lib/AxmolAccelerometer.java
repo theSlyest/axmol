@@ -30,9 +30,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.DisplayManager;
+import android.os.Build;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
+
+import java.util.Objects;
 
 public class AxmolAccelerometer implements SensorEventListener {
     // ===========================================================
@@ -65,8 +69,10 @@ public class AxmolAccelerometer implements SensorEventListener {
         this.mAccelerometer = this.mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.mCompass = this.mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
-        final Display display = ((WindowManager) this.mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        this.mNaturalOrientation = display.getOrientation();
+        final Display display = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                ? ((DisplayManager) this.mContext.getSystemService(Context.DISPLAY_SERVICE)).getDisplay(Display.DEFAULT_DISPLAY)
+                : ((WindowManager) this.mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        this.mNaturalOrientation = display.getRotation();
     }
 
     // ===========================================================
@@ -124,7 +130,9 @@ public class AxmolAccelerometer implements SensorEventListener {
             }
 
             // Invert axes for reverse landscape and reverse portrait
-            int rotation =  AxmolEngine.getActivity().getWindowManager().getDefaultDisplay().getRotation();
+            int rotation = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                    ? Objects.requireNonNull(AxmolEngine.getActivity().getDisplay()).getRotation()
+                    : AxmolEngine.getActivity().getWindowManager().getDefaultDisplay().getRotation();
             if (rotation == Surface.ROTATION_180 || rotation == Surface.ROTATION_270) {
                 x = -x;
                 y = -y;

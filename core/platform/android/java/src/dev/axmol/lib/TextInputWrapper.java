@@ -27,12 +27,13 @@ package dev.axmol.lib;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+
+import java.util.Objects;
 
 public class TextInputWrapper implements TextWatcher, OnEditorActionListener {
     // ===========================================================
@@ -123,17 +124,15 @@ public class TextInputWrapper implements TextWatcher, OnEditorActionListener {
                 }
             }
 
-            String text = pTextView.getText().toString();
+            String text = Objects.requireNonNull(pTextView.getText()).toString();
 
-            if (text != null) {
-                /* If user input nothing, translate "\n" to engine. */
-                if ( text.compareTo("") == 0) {
-                    text = "\n";
-                }
+            /* If user input nothing, translate "\n" to engine. */
+            if ( text.compareTo("") == 0) {
+                text = "\n";
+            }
 
-                if ( '\n' != text.charAt(text.length() - 1)) {
-                    text += '\n';
-                }
+            if ( '\n' != text.charAt(text.length() - 1)) {
+                text += '\n';
             }
 
             final String insertText = text;

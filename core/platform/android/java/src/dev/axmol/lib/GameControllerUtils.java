@@ -24,6 +24,8 @@
 
 package dev.axmol.lib;
 
+import android.util.Log;
+
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -55,11 +57,9 @@ public class GameControllerUtils {
             is.read(buffer);
             is.close();
 
-            String jsonstr = new String(buffer, "UTF-8");
-
-            return jsonstr;
+            return new String(buffer, "UTF-8");
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("GameControllerUtils", "readJsonFile", e);
         }
 
         return null;

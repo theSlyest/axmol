@@ -26,11 +26,14 @@ package dev.axmol.lib;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
 public class ResizeLayout extends FrameLayout {
     private  boolean mEnableForceDoLayout = false;
+
+    final Handler mHandler = new Handler(Looper.getMainLooper());
 
     public ResizeLayout(Context context){
         super(context);
@@ -50,16 +53,12 @@ public class ResizeLayout extends FrameLayout {
         if(mEnableForceDoLayout){
             /*This is a hot-fix for some android devices which don't do layout when the main window
             * is paned. We refresh the layout in 24 frames per seconds.
-            * When the editBox is lose focus or when user begin to type, the do layout is disabled.
+            * When the editBox loses focus or when user begins to type, the do layout is disabled.
             */
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //Do something after 100ms
-                    requestLayout();
-                    invalidate();
-                }
+            mHandler.postDelayed(() -> {
+                //Do something after 100ms
+                requestLayout();
+                invalidate();
             }, 1000 / 24);
 
         }

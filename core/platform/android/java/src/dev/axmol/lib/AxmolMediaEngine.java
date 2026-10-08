@@ -31,6 +31,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
@@ -154,14 +155,14 @@ public class AxmolMediaEngine extends DefaultRenderersFactory implements Player.
 
     @Override
     protected void buildVideoRenderers(
-        Context context,
-        @DefaultRenderersFactory.ExtensionRendererMode int extensionRendererMode,
-        MediaCodecSelector mediaCodecSelector,
-        boolean enableDecoderFallback,
-        Handler eventHandler,
-        VideoRendererEventListener eventListener,
-        long allowedVideoJoiningTimeMs,
-        ArrayList<Renderer> out) {
+            @NonNull Context context,
+            @DefaultRenderersFactory.ExtensionRendererMode int extensionRendererMode,
+            @NonNull MediaCodecSelector mediaCodecSelector,
+            boolean enableDecoderFallback,
+            @NonNull Handler eventHandler,
+            @NonNull VideoRendererEventListener eventListener,
+            long allowedVideoJoiningTimeMs,
+            ArrayList<Renderer> out) {
         out.add(
             new MediaCodecVideoRenderer(
                 context,
@@ -207,7 +208,7 @@ public class AxmolMediaEngine extends DefaultRenderersFactory implements Player.
                 mPlayer.setRepeatMode(mLooping ? Player.REPEAT_MODE_ALL : Player.REPEAT_MODE_OFF);
                 mPlayer.setPlayWhenReady(mAutoPlay);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Log.e(TAG, "open", ex);
             }
         });
 
@@ -312,10 +313,10 @@ public class AxmolMediaEngine extends DefaultRenderersFactory implements Player.
 
     @Override
     public void onVideoFrameAboutToBeRendered(
-        long presentationTimeUs,
-        long releaseTimeNs,
-        Format format,
-        @Nullable MediaFormat mediaFormat) {
+            long presentationTimeUs,
+            long releaseTimeNs,
+            @NonNull Format format,
+            @Nullable MediaFormat mediaFormat) {
         if (mOutputFormat != mediaFormat) {
             // format.sampleMimeType will be video/hevc or video/avc
             mOutputFormat = mediaFormat;
